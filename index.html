@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<!-- Copyright (c) 2018 Cameron Beccario. For a free version of this project, see https://github.com/cambecc/earth -->
+<html lang="en" dir="ltr" data-base="." prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#">
+
+<head>
+    <meta charset="utf-8" />
+    <title>earth :: a global map of wind, weather, and ocean conditions</title>
+    <meta name="description" content="earth" />
+
+    <meta name="viewport" content="initial-scale=0.75, user-scalable=no, viewport-fit=cover" />
+    <meta name="format-detection" content="telephone=no" />
+
+
+
+    <style>
+        html,
+        body,
+        div,
+        span,
+        svg,
+        canvas {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            -webkit-font-smoothing: subpixel-antialiased;
+        }
+
+        body {
+            color: #eeeeee;
+            background: #000005;
+            overflow: hidden;
+        }
+
+        svg {
+            overflow: hidden;
+        }
+
+        #display {
+            cursor: default;
+        }
+
+        #map,
+        #animation,
+        #fastoverlay,
+        #overlay,
+        #foreground,
+        #annotation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            will-change: transform;
+        }
+
+        .location-mark {
+            stroke: #3aff3a;
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .max-screen,
+        .fill-screen {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+
+
+</head>
+
+<body>
+
+    <div id="display">
+        <canvas id="map" class="max-screen"></canvas>
+        <canvas id="animation" class="fill-screen"></canvas>
+        <canvas id="fastoverlay"></canvas>
+        <canvas id="overlay" class="fill-screen"></canvas>
+        <canvas id="foreground" class="max-screen"></canvas>
+        <svg id="annotation" class="fill-screen" xmlns="http://www.w3.org/2000/svg" version="1.1"></svg>
+    </div>
+
+    <!-- Legacy Shim: Elements required by bundle.js but not shown -->
+    <div id="legacy-shim" style="display: none;">
+        <div id="status"></div>
+        <div id="progress"></div>
+        <div id="location">
+            <span id="location-coord"></span>
+            <span id="location-close"></span>
+            <span id="location-wind"></span>
+            <span id="location-wind-units"></span>
+            <span id="location-value"></span>
+            <span id="location-value-units"></span>
+        </div>
+        <div id="menu">
+            <span id="show-menu"></span>
+            <span id="menu-ham"></span>
+            <div id="earth"></div>
+            <span id="data-date"></span>
+            <span id="toggle-zone"></span>
+            <span id="data-layer"></span>
+            <span id="scale-label"></span>
+            <canvas id="scale"></canvas>
+            <span id="data-center"></span>
+            <span id="nav-now"></span>
+            <span id="nav-backward-more"></span>
+            <span id="nav-backward"></span>
+            <span id="nav-forward"></span>
+            <span id="nav-forward-more"></span>
+            <span id="show-location"></span>
+            <span id="option-show-grid"></span>
+            <span id="animate-start"></span>
+            <span id="hd"></span>
+
+            <span id="wind"></span>
+            <span id="temp"></span>
+            <span id="relative_humidity"></span>
+            <span id="precip_3hr"></span>
+            <span id="total_cloud_water"></span>
+            <span id="pm25"></span>
+
+            <span id="orthographic"></span>
+            <div id="settings"></div>
+            <div id="settings-show"></div>
+            <div id="settings-wrap"></div>
+        </div>
+        <div id="details"></div>
+        <div id="sponsor">
+            <span id="sponsor-hide"></span>
+        </div>
+        <div id="notice">
+            <span id="notice-hide"></span>
+        </div>
+    </div>
+
+    <!-- Patch for EarthBridge Date Crash -->
+    <script>
+        // Monkey-patch getRenderedDate to handle "current" or invalid dates gracefully
+        window.addEventListener('load', function () {
+            if (window.EarthBridge && typeof window.EarthBridge.getRenderedDate === 'function') {
+                var originalGetRenderedDate = window.EarthBridge.getRenderedDate;
+                window.EarthBridge.getRenderedDate = function () {
+                    try {
+                        return originalGetRenderedDate.apply(this, arguments);
+                    } catch (e) {
+                        try {
+                            var now = new Date();
+                            var pad = function (n) { return n < 10 ? '0' + n : n; };
+                            return now.getUTCFullYear() + '-' +
+                                pad(now.getUTCMonth() + 1) + '-' +
+                                pad(now.getUTCDate()) + ' ' +
+                                pad(now.getUTCHours()) + ':' +
+                                pad(now.getUTCMinutes());
+                        } catch (err) {
+                            return "2025-01-01 00:00"; // Absolute fallback
+                        }
+                    }
+                };
+            }
+        });
+    </script>
+
+    <script defer src="./js/bundle.js"></script>
+</body>
+
+</html>
